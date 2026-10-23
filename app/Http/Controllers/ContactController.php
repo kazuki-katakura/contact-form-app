@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExportContactRequest;
 use App\Http\Requests\StoreContactRequest;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Tag;
+use App\Services\ContactCsvExporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ContactController extends Controller
 {
@@ -42,4 +45,8 @@ class ContactController extends Controller
         return view('contact.thanks');
     }
 
+    public function export(ExportContactRequest $request, ContactCsvExporter $exporter): StreamedResponse
+    {
+        return $exporter->download($request->validated());
+    }
 }
