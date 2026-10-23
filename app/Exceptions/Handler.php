@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -18,13 +19,22 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     */
-    public function register(): void
+    public function render($request, Throwable $e)
     {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+        if ($e instanceof ModelNotFoundException && $request->is('api/*')) {
+            return response()->json([
+                'error' => 'お問い合わせが見つかりませんでした。',
+            ], 404);
+        }
+
+        return parent::render($request, $e);
+    }
+
+    /**
+     * API へのリクエストは Accept ヘッダーに関わらず JSON でエラーを返す。
+     */
+    protected function shouldReturnJson($request, Throwable $e): bool
+    {
+        return $request->is('api/*') || parent::shouldReturnJson($request, $e);
     }
 }
