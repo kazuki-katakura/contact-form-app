@@ -117,7 +117,7 @@ Docker（Docker Desktop など）がインストールされ、起動してい�
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/<GitHubユーザー名>/contact-form-app.git
+git clone https://github.com/kazuki-katakura/contact-form-app.git
 cd contact-form-app
 ```
 
