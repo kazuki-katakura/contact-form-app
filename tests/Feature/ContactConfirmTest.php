@@ -80,4 +80,42 @@ class ContactConfirmTest extends TestCase
 
         $this->get('/')->assertSee('value="山田"', false);
     }
+
+    public function test_confirm_page_has_back_button_sending_hidden_values_to_form(): void
+    {
+        $data = $this->validContactData(['category_id' => $this->category->id]);
+        $data += ['tel1' => '090', 'tel2' => '1234', 'tel3' => '5678'];
+
+        $this->post('/contacts/confirm', $data)
+            ->assertOk()
+            ->assertSee('formaction="/" formmethod="get"', false)
+            ->assertSee('name="tel1" value="090"', false)
+            ->assertSee('name="first_name" value="山田"', false);
+    }
+
+    public function test_back_to_form_keeps_input_values(): void
+    {
+        $tag = Tag::factory()->create(['name' => '質問']);
+
+        $response = $this->get('/?'.http_build_query($this->validContactData([
+            '_token' => 'dummy',
+            'gender' => 2,
+            'category_id' => $this->category->id,
+            'tag_ids' => [$tag->id],
+            'tel1' => '090',
+            'tel2' => '1234',
+            'tel3' => '5678',
+        ])));
+
+        $response->assertOk()
+            ->assertSee('name="first_name" placeholder="例: 山田" value="山田"', false)
+            ->assertSee('name="email" placeholder="例: test@example.com" value="taro@example.com"', false)
+            ->assertSee('name="tel1" id="tel1" placeholder="080" value="090"', false)
+            ->assertSee('name="tel3" id="tel3" placeholder="5678" value="5678"', false)
+            ->assertSee('商品の配送日について教えてください。</textarea>', false)
+            ->assertSee('value="2" checked', false)
+            ->assertSee('value="'.$this->category->id.'" selected', false)
+            ->assertSee('value="'.$tag->id.'"'."\n".'                        checked', false);
+        $this->assertNull(session()->getOldInput('_token'));
+    }
 }
