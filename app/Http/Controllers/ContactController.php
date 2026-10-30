@@ -9,13 +9,19 @@ use App\Models\Contact;
 use App\Models\Tag;
 use App\Services\ContactCsvExporter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ContactController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        // 確認ページの「修正」ボタンは hidden 値を GET で送るため、入力値として復元する
+        if ($request->query->count() > 0) {
+            $request->flashExcept('_token');
+        }
+
         return view('contact.index', [
             'categories' => Category::all(),
             'tags' => Tag::all(),
